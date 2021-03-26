@@ -60,12 +60,43 @@ args = parser.parse_args()
 
 # Initialize the UF2 object
 obj = UF2(args.filename[0])
-print(f'{G}[:)]{W} Parsing {obj.filename}')
+print(f'{s} Parsing {obj.filename}')
 
 # Load UF2 file to memory
 try:
 	f = open(obj.filename, 'rb').read()
 except FileNotFoundError:
-	print(f'{R}[:(]{W} {obj.filename} was not found')
+	print(f'{e} {obj.filename} was not found')
 	sys.exit(-1)
 
+
+### Parsing start here
+if len(f) < 512: # Check size
+	print(f'{e} File is not large enough to be a UF2 file. Min. size is 512 \
+bytes. This file is {len(f)} bytes long...')
+	sys.exit(-1)
+
+if f[0:4] != magic_number:
+	print(f'{e} File does not have the correct UF2 magic number')
+	print(f'     Bytes 0:4 are: {f[0:4].hex()}')
+	sys.exit(-1)
+
+if f[4:8] != second_magic_number:
+	print(f'{e} File does not have the correct UF2 magic number')
+	print(f'     Bytes 4:8 are: {f[4:8].hex()}')
+	sys.exit(-1)
+
+if f[508:512] != final_magic_number:
+	print(f'{e} Block does not have the correct UF2 magic number')
+	print(f'     Bytes 508:512 are: {f[508:512].hex()}')
+	sys.exit(-1)
+
+obj.flags 			= f[8:12]
+obj.target_addr 	= f[12:16]
+obj.num_bytes		= f[16:20]
+obj.seq_num			= f[20:24]
+obj.num_blocks 		= f[24:28]
+obj.family_or_size 	= f[28:32]
+obj.data			= f[32:508]
+
+	
