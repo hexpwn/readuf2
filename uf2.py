@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
-
-def printableByte(b):
-    if (b < 127) & (b > 32):
-        return chr(b)
-    else:
-        return '.'
-
-def printableArray(arr):
-    r = ''
-    for c in arr:
-        r += printableByte(c)
-    return r
+from utils import printableByte, printableArray
 
 class UF2:
     families = {

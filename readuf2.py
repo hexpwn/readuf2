@@ -12,6 +12,7 @@
 
 from uf2 import UF2
 from jinja2 import nativetypes
+from utils import printableByte, printableArray, printableData
 import argparse
 import sys
 import struct
@@ -45,29 +46,6 @@ try:
 except FileNotFoundError:
 	print(f'{e} {filename} was not found')
 	sys.exit(-1)
-
-# Helper functions (too lazy to split into a utils.py file right now...)
-def printableByte(b):
-    if (b < 127) & (b > 32):
-        return chr(b)
-    else:
-        return '.'
-
-def printableArray(arr):
-    r = ''
-    for c in arr:
-        r += printableByte(c)
-    return r
-
-def printableData(raw):
-	''' not how it workssss.... #FIXME '''
-	r = ''
-	for i in range(len(raw)//16):
-		data = raw[i*16:(i*16)+16]
-		while(len(data) < 16):
-			data += b'\x00'
-		r += f"{i*16:#010x}   {data.hex(' ', 1)}  {printableArray(data)}\n"
-	return r
 
 
 ### Parsing start here
