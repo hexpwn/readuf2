@@ -13,6 +13,7 @@
 from uf2 import UF2
 import argparse
 import sys
+import struct
 
 # Console shenanigans
 e = '\033[31m[:(]\033[0m'
@@ -58,11 +59,10 @@ parser.add_argument('filename', metavar='FILENAME', type=str, nargs=1, \
 					help='the path to a UF2 file to be analyzed')
 args = parser.parse_args()
 
-# Initialize the UF2 block
+# Load the file into memory
 filename = args.filename[0]
 print(f'{s} Parsing {filename}')
 
-# Load UF2 file to memory
 try:
 	f = open(filename, 'rb').read()
 except FileNotFoundError:
@@ -77,6 +77,7 @@ bytes. This file is {len(f)} bytes long...')
 	sys.exit(-1)
 
 bi = 0 # Block index
+block = UF2() # Block object
 while True:
 	# Check block size
 	try:
@@ -85,24 +86,32 @@ while True:
 		print(f'{e} Block is not large enough to be a UF2 file. Min. size is \
 512	bytes. This block is {len(f[bi*512:])} bytes long...')
 		sys.exit(-1)
+
 	block.magic1			= b[0:4]
-	block.magic2			= b[4:8]	
-	block.flags 			= b[8:12]
-	block.target_addr 		= b[12:16]
-	block.num_bytes			= b[16:20]
-	block.seq_num			= b[20:24]
-	block.num_blocks 		= b[24:28]
-	block.family_or_size 	= b[28:32]
+	block.magic2			= b[4:8]
+	block.flags 			= struct.unpack("I", b[8:12])
+	block.target_addr 		= struct.unpack("I", b[12:16])
+	block.num_bytes			= struct.unpack("I", b[16:20])[0]
+	block.seq_num			= struct.unpack("I", b[20:24])[0]
+	block.num_blocks 		= struct.unpack("I", b[24:28])[0]
+	block.family_or_size	= struct.unpack("I", b[28:32])[0]
 	block.data				= b[32:508]
 	block.magic3			= b[508:512]
 
 	if block.magic1 != magic_number:
 		print(f'{e} Block does not have the correct UF2 magic number')
-		print(f'     Bytes 0:4 are: {block.magic1.hex()}')
+		print(f'     Bytes 0:4 are: {block.magic1}')
 		sys.exit(-1)
 
 	if block.magic2 != second_magic_number:
 		print(f'{e} Block does not have the correct UF2 magic number')
 		print(f'     Bytes 4:8 are: {block.magic2.hex()}')
 		sys.exit(-1)
+
+	# Parse next block?
+	if block.seq_num < block.num_blocks - 1:
+		bi += 1
+	else:
+		print(f'{s} parsed all blocks')
+		break
 
