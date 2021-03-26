@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
 
+def printableByte(b):
+    if (b < 127) & (b > 32):
+        return chr(b)
+    else:
+        return '.'
+
+def printableArray(arr):
+    r = ''
+    for c in arr:
+        r += printableByte(c)
+    return r
+
 class UF2:
     families = {
         'SAMD21': 0x68ed2b88,
@@ -39,3 +51,49 @@ class UF2:
         self.num_blocks     = None
         self.family_or_size = None
         self.data           = None
+
+    def getFlag1(self):
+        ''' not main flash '''
+        return self.flags[0] & 0x0000_0001 > 0
+    
+    def getFlag2(self):
+        ''' file container '''
+        return self.flags[0] & 0x0000_1000 > 0
+    
+    def getFlag3(self):
+        ''' familyID present '''
+        return self.flags[0] & 0x0000_2000 > 0
+    
+    def getFlag4(self):
+        ''' MD5 checksum present '''
+        return self.flags[0] & 0x0000_4000 > 0
+    
+    def getFlag5(self):
+        ''' extension tags present '''
+        return self.flags[0] & 0x0000_8000 > 0
+
+    def getAddress(self):
+        return hex(self.target_addr[0])
+
+    def getFamilyId(self):
+        return hex(self.family_or_size)
+
+    def getFamilyName(self):
+        for k, v in self.families.items():
+            if self.family_or_size == v:
+                return k
+        return 'Unknown'
+    
+    def printableData(self):
+        r = ''
+        for i in range(30):
+            data = self.data[i*16:(i*16)+16]
+            while(len(data) < 16):
+                data += b'\x00'
+            r += f"{i*16:#010x}   {data.hex(' ', 1)}  {printableArray(data)}\n"
+        return r
+
+    
+
+
+    
