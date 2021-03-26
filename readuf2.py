@@ -10,6 +10,7 @@
     License: IDGAF 1.0
 '''
 
+from uf2 import UF2
 import argparse
 
 # Parse the arguments
