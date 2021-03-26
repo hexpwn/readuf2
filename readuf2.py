@@ -12,6 +12,7 @@
 
 from uf2 import UF2
 import argparse
+import sys
 
 # Console shenanigans
 G = '\033[32m'
@@ -60,4 +61,10 @@ args = parser.parse_args()
 obj = UF2(args.filename[0])
 print(f'{G}[:)]{W} Parsing {obj.filename}')
 
+# Load UF2 file to memory
+try:
+	f = open(obj.filename, 'rb').read()
+except FileNotFoundError:
+	print(f'{R}[:(]{W} {obj.filename} was not found')
+	sys.exit(-1)
 
