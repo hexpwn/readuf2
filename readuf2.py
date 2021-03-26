@@ -58,45 +58,51 @@ parser.add_argument('filename', metavar='FILENAME', type=str, nargs=1, \
 					help='the path to a UF2 file to be analyzed')
 args = parser.parse_args()
 
-# Initialize the UF2 object
-obj = UF2(args.filename[0])
-print(f'{s} Parsing {obj.filename}')
+# Initialize the UF2 block
+filename = args.filename[0]
+print(f'{s} Parsing {filename}')
 
 # Load UF2 file to memory
 try:
-	f = open(obj.filename, 'rb').read()
+	f = open(filename, 'rb').read()
 except FileNotFoundError:
-	print(f'{e} {obj.filename} was not found')
+	print(f'{e} {filename} was not found')
 	sys.exit(-1)
 
 
 ### Parsing start here
-if len(f) < 512: # Check size
+if len(f) < 512: # Check file size
 	print(f'{e} File is not large enough to be a UF2 file. Min. size is 512 \
 bytes. This file is {len(f)} bytes long...')
 	sys.exit(-1)
 
-if f[0:4] != magic_number:
-	print(f'{e} File does not have the correct UF2 magic number')
-	print(f'     Bytes 0:4 are: {f[0:4].hex()}')
-	sys.exit(-1)
+bi = 0 # Block index
+while True:
+	# Check block size
+	try:
+		b = f[bi*512:bi*512+512]
+	except IndexError:
+		print(f'{e} Block is not large enough to be a UF2 file. Min. size is \
+512	bytes. This block is {len(f[bi*512:])} bytes long...')
+		sys.exit(-1)
+	block.magic1			= b[0:4]
+	block.magic2			= b[4:8]	
+	block.flags 			= b[8:12]
+	block.target_addr 		= b[12:16]
+	block.num_bytes			= b[16:20]
+	block.seq_num			= b[20:24]
+	block.num_blocks 		= b[24:28]
+	block.family_or_size 	= b[28:32]
+	block.data				= b[32:508]
+	block.magic3			= b[508:512]
 
-if f[4:8] != second_magic_number:
-	print(f'{e} File does not have the correct UF2 magic number')
-	print(f'     Bytes 4:8 are: {f[4:8].hex()}')
-	sys.exit(-1)
+	if block.magic1 != magic_number:
+		print(f'{e} Block does not have the correct UF2 magic number')
+		print(f'     Bytes 0:4 are: {block.magic1.hex()}')
+		sys.exit(-1)
 
-if f[508:512] != final_magic_number:
-	print(f'{e} Block does not have the correct UF2 magic number')
-	print(f'     Bytes 508:512 are: {f[508:512].hex()}')
-	sys.exit(-1)
+	if block.magic2 != second_magic_number:
+		print(f'{e} Block does not have the correct UF2 magic number')
+		print(f'     Bytes 4:8 are: {block.magic2.hex()}')
+		sys.exit(-1)
 
-obj.flags 			= f[8:12]
-obj.target_addr 	= f[12:16]
-obj.num_bytes		= f[16:20]
-obj.seq_num			= f[20:24]
-obj.num_blocks 		= f[24:28]
-obj.family_or_size 	= f[28:32]
-obj.data			= f[32:508]
-
-	
