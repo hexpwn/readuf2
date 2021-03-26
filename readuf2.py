@@ -15,9 +15,8 @@ import argparse
 import sys
 
 # Console shenanigans
-G = '\033[32m'
-W = '\033[0m'
-R = '\033[31m'
+e = '\033[31m[:(]\033[0m'
+s = '\033[32m[:)]\033[0m'
 
 # Important variables
 magic_number        = b'\x55\x46\x32\x0a'
