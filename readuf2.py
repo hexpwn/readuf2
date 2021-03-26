@@ -53,8 +53,10 @@ families = {
 }
 
 # Parse the arguments
-parser = argparse.ArgumentParser(description='Get an overview of UF2 files. Like `readelf`, but for UF2 files.')
-parser.add_argument('filename', metavar='FILENAME', type=str, nargs=1, help='the path to a UF2 file to be analyzed')
+parser = argparse.ArgumentParser(description='Get an overview of UF2 files.\
+ Like `readelf`, but for UF2 files.')
+parser.add_argument('filename', metavar='FILENAME', type=str, nargs=1, \
+					help='the path to a UF2 file to be analyzed')
 args = parser.parse_args()
 
 # Initialize the UF2 object
