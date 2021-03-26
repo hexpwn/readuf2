@@ -6,6 +6,10 @@ A simple tool to get a quick understanding of what a UF2 file is carrying.
 ##### Disclaimer
 The tool is a *Work In Progress*, please read [to-dos](#To-Do) for a quick idea of the currently missing functionalities.
 
+<img src="img/demo.gif"  />
+
+​																														*CRT not included*
+
 
 ## Requirements
 * [Python 3](https://www.python.org/download/releases/3.0/)
