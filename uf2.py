@@ -92,8 +92,3 @@ class UF2:
                 data += b'\x00'
             r += f"{i*16:#010x}   {data.hex(' ', 1)}  {printableArray(data)}\n"
         return r
-
-    
-
-
-    

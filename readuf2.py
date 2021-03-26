@@ -25,12 +25,14 @@ magic_number        = b'\x55\x46\x32\x0a'
 second_magic_number = b'\x57\x51\x5d\x9e'
 final_magic_number  = b'\x30\x6f\xb1\x0a'
 
-
 # Parse the arguments
 parser = argparse.ArgumentParser(description='Get an overview of UF2 files.\
  Like `readelf`, but for UF2 files.')
 parser.add_argument('filename', metavar='FILENAME', type=str, nargs=1, \
 					help='the path to a UF2 file to be analyzed')
+parser.add_argument('-o, --output', metavar='output_filename', type=str, \
+					nargs=1, help='an optional path for an output binary file',\
+					dest='output')
 args = parser.parse_args()
 
 # Load the file into memory
@@ -38,10 +40,35 @@ filename = args.filename[0]
 print(f'{s} Parsing {filename}')
 
 try:
-	f = open(filename, 'rb').read()
+	f_ = open(filename, 'rb')
+	f = f_.read()
+	f_.close()
 except FileNotFoundError:
 	print(f'{e} {filename} was not found')
 	sys.exit(-1)
+
+# Helper functions (too lazy to split into a utils.py file right now...)
+def printableByte(b):
+    if (b < 127) & (b > 32):
+        return chr(b)
+    else:
+        return '.'
+
+def printableArray(arr):
+    r = ''
+    for c in arr:
+        r += printableByte(c)
+    return r
+
+def printableData(raw):
+	''' not how it workssss.... #FIXME '''
+	r = ''
+	for i in range(len(raw)//16):
+		data = raw[i*16:(i*16)+16]
+		while(len(data) < 16):
+			data += b'\x00'
+		r += f"{i*16:#010x}   {data.hex(' ', 1)}  {printableArray(data)}\n"
+	return r
 
 
 ### Parsing start here
@@ -50,10 +77,12 @@ if len(f) < 512: # Check file size
 bytes. This file is {len(f)} bytes long...')
 	sys.exit(-1)
 
-bi = 0 # Block index
-block = UF2() # Block object
+bi 		= 0 	# Block index
+block 	= UF2() # Block object
+rawdata	= b'' 	# Used to print the final data output of the file
+
 while True:
-	# Check block size
+	# Carve block from file
 	try:
 		b = f[bi*512:bi*512+512]
 	except IndexError:
@@ -89,8 +118,7 @@ while True:
 
 	env = nativetypes.NativeEnvironment()
 	template = env.from_string("""
-Block #{{ block.seq_num }}
--------------
+{{ '-' * 77 }}
 Target address:	{{ block.getAddress() }}
 Block size:	{{ block.num_bytes }} bytes
 Seq number: 	{{ block.seq_num }}/{{ block.num_blocks - 1 }}
@@ -106,14 +134,22 @@ File size: {{ block.getFamilyId() }} bytes
 {% endif %}
 Data:
 {{ block.printableData() }}
-
 """)
 	print(template.render(block=block))
 	
+	rawdata += block.data[:block.num_bytes]
+	
+	if args.output != None:
+		with open(args.output[0], 'wb') as of:
+			of.write(rawdata)
+					
 	# Parse next block?
 	if block.seq_num < block.num_blocks - 1:
 		bi += 1
 	else:
 		print(f'{s} parsed all blocks')
+		print(f'{"-" * 77}')
+		print(f'Output data:')
+		print(printableData(rawdata))
 		break
 
