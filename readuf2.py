@@ -11,6 +11,7 @@
 '''
 
 from uf2 import UF2
+from jinja2 import nativetypes
 import argparse
 import sys
 import struct
@@ -100,14 +101,32 @@ while True:
 
 	if block.magic1 != magic_number:
 		print(f'{e} Block does not have the correct UF2 magic number')
-		print(f'     Bytes 0:4 are: {block.magic1}')
+		print(f'     Bytes 0:4 are: {(block.magic1).hex()}')
 		sys.exit(-1)
 
 	if block.magic2 != second_magic_number:
 		print(f'{e} Block does not have the correct UF2 magic number')
-		print(f'     Bytes 4:8 are: {block.magic2.hex()}')
+		print(f'     Bytes 4:8 are: {(block.magic2).hex()}')
 		sys.exit(-1)
 
+	if block.magic3 != final_magic_number:
+		print(f'{e} Block does not have the correct UF2 magic number')
+		print(f'     Bytes 508:512 are: {(block.magic3).hex()}')
+		sys.exit(-1)
+
+	env = nativetypes.NativeEnvironment()
+	template = env.from_string("""
+Block #{{ block.seq_num }}
+-------------
+Target address:	{{ block.getAddress() }}
+Flags:	[{{ '*' if block.getFlag1() else ' ' }}] not main flash	\
+	[{{ '*' if block.getFlag2() else ' ' }}] file container
+	[{{ '*' if block.getFlag3() else ' ' }}] familyID present	\
+	[{{ '*' if block.getFlag4() else ' ' }}] MD5 checksum present
+	[{{ '*' if block.getFlag5() else ' ' }}] extension tags present
+""")
+	print(template.render(block=block))
+	
 	# Parse next block?
 	if block.seq_num < block.num_blocks - 1:
 		bi += 1
