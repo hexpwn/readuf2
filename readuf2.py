@@ -20,9 +20,9 @@ W = '\033[0m'
 R = '\033[31m'
 
 # Important variables
-magic_number        = '\x0a\x32\x46\x55'
-second_magic_number = '\x9e\x5d\x51\x57'
-final_magic_number  = '\x0a\xb1\x6f\x30'
+magic_number        = b'\x55\x46\x32\x0a'
+second_magic_number = b'\x57\x51\x5d\x9e'
+final_magic_number  = b'\x30\x6f\xb1\x0a'
 
 families = {
     'SAMD21': 0x68ed2b88,
