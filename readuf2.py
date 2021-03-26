@@ -92,11 +92,21 @@ while True:
 Block #{{ block.seq_num }}
 -------------
 Target address:	{{ block.getAddress() }}
-Flags:	[{{ '*' if block.getFlag1() else ' ' }}] not main flash	\
-	[{{ '*' if block.getFlag2() else ' ' }}] file container
-	[{{ '*' if block.getFlag3() else ' ' }}] familyID present	\
-	[{{ '*' if block.getFlag4() else ' ' }}] MD5 checksum present
-	[{{ '*' if block.getFlag5() else ' ' }}] extension tags present
+Block size:	{{ block.num_bytes }} bytes
+Seq number: 	{{ block.seq_num }}/{{ block.num_blocks - 1 }}
+Flags:		[{{ '*' if block.getFlag1() else ' ' }}] not main flash	\
+		[{{ '*' if block.getFlag2() else ' ' }}] file container
+		[{{ '*' if block.getFlag3() else ' ' }}] familyID present	\
+		[{{ '*' if block.getFlag4() else ' ' }}] MD5 checksum present
+		[{{ '*' if block.getFlag5() else ' ' }}] extension tags present\
+{% if block.getFlag3() %}
+FamilyID:	{{ block.getFamilyId() }} - {{ block.getFamilyName() }}
+{% else %}
+File size: {{ block.getFamilyId() }} bytes
+{% endif %}
+Data:
+{{ block.printableData() }}
+
 """)
 	print(template.render(block=block))
 	
