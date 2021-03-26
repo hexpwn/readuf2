@@ -2,7 +2,7 @@
 
 '''
     https://github.com/hexpwn/readuf2
-    Version: 0.0a
+    Version: 0.01
 
     `readuf2` is supposed to be a `readelf` for UF2 files. 
     A simple tool to get a quick understanding of what a UF2 files is packing.
@@ -37,7 +37,6 @@ args = parser.parse_args()
 
 # Load the file into memory
 filename = args.filename[0]
-print(f'{s} Parsing {filename}')
 
 try:
 	f_ = open(filename, 'rb')
@@ -147,7 +146,6 @@ Data:
 	if block.seq_num < block.num_blocks - 1:
 		bi += 1
 	else:
-		print(f'{s} parsed all blocks')
 		print(f'{"-" * 77}')
 		print(f'Output data:')
 		print(printableData(rawdata))
